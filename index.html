@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý và Điều hành nội bộ HĐND Phường Tân Tiến</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #8b0000; /* Đỏ sẫm */
+            --primary-hover: #660000;
+            --bg: #f4f6f9;
+        }
+        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        
+        /* Login Screen */
+        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 100%; max-width: 400px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); padding: 30px; }
+        .btn-custom { background-color: var(--primary); color: white; border: none; }
+        .btn-custom:hover { background-color: var(--primary-hover); color: white; }
+        .text-primary-custom { color: var(--primary) !important; }
+
+        /* Main Screen */
+        #main-screen { display: none; height: 100vh; }
+        .sidebar { width: 250px; background-color: var(--primary); color: white; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
+        .nav-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background-color: rgba(255,255,255,0.2); border-left: 4px solid #fff; }
+        .nav-item i { width: 25px; }
+        .main-content { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: var(--bg); }
+        
+        /* Tabs & Cards */
+        .tab-pane { display: none; animation: fadeIn 0.3s; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .card-header-custom { background-color: #fff; border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .table th { background-color: var(--primary); color: white; }
+        .badge-pending { background-color: #ffc107; color: #000; }
+        .badge-approved { background-color: #198754; color: #fff; }
+        .badge-rejected { background-color: #dc3545; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH ĐĂNG NHẬP -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h4 class="text-center text-primary-custom fw-bold mb-1">HĐND Phường Tân Tiến</h4>
+            <p class="text-center text-muted mb-4"><small>Hệ thống Quản lý & Điều hành</small></p>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tên đăng nhập</label>
+                    <input type="text" class="form-control" id="username" required placeholder="admin hoặc user">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Mật khẩu</label>
+                    <input type="password" class="form-control" id="password" required placeholder="12345">
+                </div>
+                <button type="submit" class="btn btn-custom w-100 fw-bold"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH CHÍNH -->
+    <div id="main-screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-university fa-2x mb-2"></i><br>HĐND TÂN TIẾN
+            </div>
+            <div class="nav-item active" id="nav-taikhoan" onclick="switchTab('tab-taikhoan', this)"><i class="fas fa-users"></i> Quản lý Tài khoản</div>
+            <div class="nav-item" id="nav-lichhop" onclick="switchTab('tab-lichhop', this)"><i class="fas fa-calendar-alt"></i> Quản lý Lịch họp</div>
+            <div class="nav-item" id="nav-vanban" onclick="switchTab('tab-vanban', this)"><i class="fas fa-file-signature"></i> Quản lý Văn bản</div>
+            <div class="nav-item" id="nav-ykien" onclick="switchTab('tab-ykien', this)"><i class="fas fa-comments"></i> Quản lý Ý kiến cử tri</div>
+            <div class="nav-item mt-auto border-top" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h4 id="page-title" class="text-primary-custom fw-bold m-0">Quản lý Tài khoản</h4>
+                <div class="d-flex align-items-center">
+                    <div><i class="fas fa-user-circle text-primary-custom"></i> Xin chào, <b id="display-user">Admin</b></div>
+                    <button class="btn btn-sm btn-outline-secondary ms-3" data-bs-toggle="modal" data-bs-target="#modalDoiMatKhau" title="Đổi mật khẩu"><i class="fas fa-key"></i> Đổi mật khẩu</button>
+                </div>
+            </div>
+
+            <!-- TAB: TÀI KHOẢN -->
+            <div id="tab-taikhoan" class="tab-pane active">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                        <span>Danh sách Tài khoản</span>
+                        <button class="btn btn-sm btn-custom" id="btn-add-taikhoan" onclick="openModal('taikhoan')"><i class="fas fa-plus"></i> Thêm Đại biểu</button>
+                    </div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover m-0">
+                            <thead id="thead-taikhoan"><tr><th>Họ và tên</th><th>Tên đăng nhập</th><th>Chức vụ</th><th>Quyền</th><th class="text-center">Thao tác</th></tr></thead>
+                            <tbody id="tb-taikhoan"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: LỊCH HỌP -->
+            <div id="tab-lichhop" class="tab-pane">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                        <span>Danh sách Lịch họp</span>
+                        <button class="btn btn-sm btn-custom" id="btn-add-lichhop" onclick="openModal('lichhop')"><i class="fas fa-plus"></i> Thêm Lịch họp</button>
+                    </div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover m-0">
+                            <thead id="thead-lichhop"><tr><th>Tiêu đề</th><th>Thời gian</th><th>Địa điểm</th><th>Nội dung</th><th class="text-center">Thao tác</th></tr></thead>
+                            <tbody id="tb-lichhop"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: VĂN BẢN -->
+            <div id="tab-vanban" class="tab-pane">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                        <span>Danh sách Văn bản</span>
+                        <button class="btn btn-sm btn-custom" id="btn-add-vanban" onclick="openModal('vanban')"><i class="fas fa-plus"></i> Thêm Văn bản</button>
+                    </div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover m-0">
+                            <thead id="thead-vanban"><tr><th>Số hiệu</th><th>Tên văn bản</th><th>Ngày ban hành</th><th>Link đính kèm</th><th class="text-center">Thao tác</th></tr></thead>
+                            <tbody id="tb-vanban"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Ý KIẾN CỬ TRI -->
+            <div id="tab-ykien" class="tab-pane">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header card-header-custom">Gửi ý kiến mới</div>
+                    <div class="card-body">
+                        <form id="formYkien" onsubmit="submitYkien(event)">
+                            <textarea class="form-control mb-2" id="ykien-content" rows="2" placeholder="Nhập nội dung ý kiến..." required></textarea>
+                            <button type="submit" class="btn btn-custom btn-sm"><i class="fas fa-paper-plane"></i> Gửi Ý Kiến</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0">
+                    <div class="card-header card-header-custom">Danh sách Ý kiến</div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover m-0">
+                            <thead id="thead-ykien"><tr><th>Người gửi</th><th>Nội dung</th><th>Ngày gửi</th><th>Trạng thái</th><th class="text-center">Thao tác</th></tr></thead>
+                            <tbody id="tb-ykien"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Modal Đổi Mật Khẩu -->
+    <div class="modal fade" id="modalDoiMatKhau" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
+                <h5 class="modal-title">Đổi mật khẩu</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formDoiMatKhau">
+                    <div class="mb-2"><label class="fw-bold">Mật khẩu cũ</label><input type="password" class="form-control" id="mk-cu" required></div>
+                    <div class="mb-2"><label class="fw-bold">Mật khẩu mới</label><input type="password" class="form-control" id="mk-moi" required></div>
+                    <div class="mb-2"><label class="fw-bold">Xác nhận mật khẩu mới</label><input type="password" class="form-control" id="mk-xacnhan" required></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-custom" onclick="saveDoiMatKhau()">Lưu</button></div>
+        </div></div>
+    </div>
+
+    <!-- Modal Tài khoản -->
+    <div class="modal fade" id="modalTaiKhoan" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
+                <h5 class="modal-title" id="modalTaiKhoanTitle">Thêm Đại biểu mới</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTaiKhoan">
+                    <div class="mb-2"><label class="fw-bold">Họ và tên</label><input type="text" class="form-control" id="tk-hoten" required></div>
+                    <div class="mb-2"><label class="fw-bold">Chức vụ hiện tại</label><input type="text" class="form-control" id="tk-chucvu" required></div>
+                    <div class="mb-2"><label class="fw-bold">Quyền</label>
+                        <select class="form-select" id="tk-quyen"><option value="User">User</option><option value="Admin">Admin</option></select>
+                    </div>
+                    <div class="alert alert-warning p-2 mt-2 mb-0" id="tk-alert"><small>Tên đăng nhập và mật khẩu mặc định <b>12345</b> sẽ được tạo tự động.</small></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-custom" onclick="saveTaiKhoan()">Lưu</button></div>
+        </div></div>
+    </div>
+
+    <!-- Modal Lịch họp -->
+    <div class="modal fade" id="modalLichHop" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
+                <h5 class="modal-title" id="modalLichHopTitle">Thêm Lịch họp</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formLichHop">
+                    <div class="mb-2"><label class="fw-bold">Tiêu đề</label><input type="text" class="form-control" id="lh-tieude" required></div>
+                    <div class="mb-2"><label class="fw-bold">Thời gian</label><input type="datetime-local" class="form-control" id="lh-thoigian" required></div>
+                    <div class="mb-2"><label class="fw-bold">Địa điểm</label><input type="text" class="form-control" id="lh-diadiem" required></div>
+                    <div class="mb-2"><label class="fw-bold">Nội dung</label><textarea class="form-control" id="lh-noidung" rows="3" required></textarea></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-custom" onclick="saveLichHop()">Lưu</button></div>
+        </div></div>
+    </div>
+
+    <!-- Modal Văn bản -->
+    <div class="modal fade" id="modalVanBan" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
+                <h5 class="modal-title" id="modalVanBanTitle">Thêm Văn bản</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formVanBan">
+                    <div class="mb-2"><label class="fw-bold">Số hiệu</label><input type="text" class="form-control" id="vb-sohieu" required></div>
+                    <div class="mb-2"><label class="fw-bold">Tên văn bản</label><input type="text" class="form-control" id="vb-ten" required></div>
+                    <div class="mb-2"><label class="fw-bold">Ngày ban hành</label><input type="date" class="form-control" id="vb-ngay" required></div>
+                    <div class="mb-2"><label class="fw-bold">Link đính kèm</label><input type="url" class="form-control" id="vb-link" required></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-custom" onclick="saveVanBan()">Lưu</button></div>
+        </div></div>
+    </div>
+
+    <!-- Modal Chi tiết Ý kiến -->
+    <div class="modal fade" id="modalChiTietYkien" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
+                <h5 class="modal-title">Chi tiết Ý kiến cử tri</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2"><strong>Người gửi:</strong> <span id="ct-nguoigui"></span></div>
+                <div class="mb-2"><strong>Ngày gửi:</strong> <span id="ct-ngaygui"></span></div>
+                <div class="mb-2"><strong>Trạng thái:</strong> <span id="ct-trangthai"></span></div>
+                <div class="mb-2"><strong>Nội dung:</strong></div>
+                <div class="p-2 border rounded bg-light" id="ct-noidung" style="min-height: 80px; white-space: pre-wrap;"></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button></div>
+        </div></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JAVASCRIPT LOGIC & API -->
+    <script>
+        // 1. KHAI BÁO BIẾN TOÀN CỤC
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw2xgMU3wV-L3bo2CtK63YJK-2_Etaa5Pqg8vuD8rMziBuyGVs6YvisxFObyJIJPayOuA/exec';
+        let currentUser = null;
+        let currentEditId = null;
+        let globalData = { taikhoan: [], lichhop: [], vanban: [], ykien: [] };
+
+        // 2. UI HELPERS
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('page-title').innerText = el.innerText.trim();
+            document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+        const showLoad = () => Swal.fire({title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+        const hideLoad = () => Swal.close();
+        const showMsg = (icon, msg) => Swal.fire({icon: icon, title: msg, timer: 2000, showConfirmButton: false});
+
+        // 3. API WRAPPERS (SỬ DỤNG GOOGLE APPS SCRIPT)
+        async function apiGet(action) {
+            try {
+                let response = await fetch(API_URL + '?action=' + action);
+                let result = await response.json();
+                return result;
+            } catch (error) {
+                console.error("GET Error:", error);
+                return { success: false, data: [] };
+            }
+        }
+
+        async function apiPost(payload) {
+            try {
+                let response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                let result = await response.json();
+                return result;
+            } catch (error) {
+                console.error("POST Error:", error);
+                return { success: false };
+            }
+        }
+
+        // 4. LOGIN / LOGOUT / ROLE UI
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let u = document.getElementById('username').value;
+            let p = document.getElementById('password').value;
+            showLoad();
+            let res = await apiPost({ action: 'login', username: u, password: p });
+            hideLoad();
+            
+            if(res.success) {
+                currentUser = res.data;
+                
+                document.getElementById('display-user').innerText = currentUser.fullName;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-screen').style.display = 'flex';
+                
+                applyRoleUI();
+                loadAllData();
+            } else {
+                Swal.fire('Lỗi', 'Sai thông tin đăng nhập (Thử admin/12345 hoặc user/12345)', 'error');
+            }
+        });
+
+        function applyRoleUI() {
+            let isAdmin = currentUser.role === 'Admin';
+            
+            // Ẩn/hiện menu và nút thêm
+            document.getElementById('nav-taikhoan').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('btn-add-lichhop').style.display = isAdmin ? 'inline-block' : 'none';
+            document.getElementById('btn-add-vanban').style.display = isAdmin ? 'inline-block' : 'none';
+            
+            // Chuyển tab mặc định
+            if (!isAdmin) {
+                switchTab('tab-lichhop', document.getElementById('nav-lichhop'));
+            } else {
+                switchTab('tab-taikhoan', document.getElementById('nav-taikhoan'));
+            }
+        }
+
+        function logout(force = false) {
+            if(force) {
+                doLogout();
+            } else {
+                Swal.fire({title: 'Đăng xuất?', icon: 'question', showCancelButton: true}).then((r) => {
+                    if(r.isConfirmed) doLogout();
+                });
+            }
+        }
+
+        function doLogout() {
+            currentUser = null;
+            document.getElementById('loginForm').reset();
+            document.getElementById('main-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        // 5. MODAL HELPERS (ADD/EDIT)
+        function openModal(type, id = null) {
+            currentEditId = id;
+            let modalId = '';
+            
+            if (type === 'taikhoan') {
+                modalId = 'modalTaiKhoan';
+                document.getElementById('formTaiKhoan').reset();
+                document.getElementById('tk-alert').style.display = id ? 'none' : 'block';
+                if (id !== null) {
+                    document.getElementById('modalTaiKhoanTitle').innerText = 'Cập nhật Đại biểu';
+                    let item = globalData.taikhoan.find((x, i) => (x.id || i) == id);
+                    if(item) {
+                        document.getElementById('tk-hoten').value = item['Họ và tên'] || '';
+                        document.getElementById('tk-chucvu').value = item['Chức vụ hiện tại'] || '';
+                        document.getElementById('tk-quyen').value = item['Quyền'] || 'User';
+                    }
+                } else {
+                    document.getElementById('modalTaiKhoanTitle').innerText = 'Thêm Đại biểu mới';
+                }
+            } else if (type === 'lichhop') {
+                modalId = 'modalLichHop';
+                document.getElementById('formLichHop').reset();
+                if (id !== null) {
+                    document.getElementById('modalLichHopTitle').innerText = 'Cập nhật Lịch họp';
+                    let item = globalData.lichhop.find((x, i) => (x.id || i) == id);
+                    if(item) {
+                        document.getElementById('lh-tieude').value = item['Tiêu đề'] || '';
+                        document.getElementById('lh-thoigian').value = item['Thời gian'] ? item['Thời gian'].slice(0,16) : '';
+                        document.getElementById('lh-diadiem').value = item['Địa điểm'] || '';
+                        document.getElementById('lh-noidung').value = item['Nội dung'] || '';
+                    }
+                } else {
+                    document.getElementById('modalLichHopTitle').innerText = 'Thêm Lịch họp';
+                }
+            } else if (type === 'vanban') {
+                modalId = 'modalVanBan';
+                document.getElementById('formVanBan').reset();
+                if (id !== null) {
+                    document.getElementById('modalVanBanTitle').innerText = 'Cập nhật Văn bản';
+                    let item = globalData.vanban.find((x, i) => (x.id || i) == id);
+                    if(item) {
+                        document.getElementById('vb-sohieu').value = item['Số hiệu'] || '';
+                        document.getElementById('vb-ten').value = item['Tên văn bản'] || '';
+                        let dateVal = item['Ngày ban hành'] ? new Date(item['Ngày ban hành']).toISOString().split('T')[0] : '';
+                        document.getElementById('vb-ngay').value = dateVal;
+                        document.getElementById('vb-link').value = item['Link đính kèm'] || '';
+                    }
+                } else {
+                    document.getElementById('modalVanBanTitle').innerText = 'Thêm Văn bản';
+                }
+            }
+            
+            bootstrap.Modal.getOrCreateInstance(document.getElementById(modalId)).show();
+        }
+
+        // 6. LOAD DATA
+        function loadAllData() {
+            if(currentUser.role === 'Admin') loadTaiKhoan();
+            loadLichHop(); 
+            loadVanBan(); 
+            loadYkien();
+        }
+
+        async function loadTaiKhoan() {
+            let res = await apiGet('getTaiKhoan');
+            globalData.taikhoan = res.data || [];
+            document.getElementById('tb-taikhoan').innerHTML = globalData.taikhoan.map((item, i) => {
+                let id = item.id || i;
+                return `<tr>
+                    <td>${item['Họ và tên'] || ''}</td>
+                    <td>${item['Tên đăng nhập'] || ''}</td>
+                    <td>${item['Chức vụ hiện tại'] || ''}</td>
+                    <td>${item['Quyền'] || ''}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="openModal('taikhoan', '${id}')" title="Sửa"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem('deleteTaiKhoan', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function loadLichHop() {
+            let res = await apiGet('getLichHop');
+            globalData.lichhop = res.data || [];
+            let isAdmin = currentUser.role === 'Admin';
+            
+            document.getElementById('thead-lichhop').innerHTML = `<tr><th>Tiêu đề</th><th>Thời gian</th><th>Địa điểm</th><th>Nội dung</th>${isAdmin ? '<th class="text-center">Thao tác</th>' : ''}</tr>`;
+            
+            document.getElementById('tb-lichhop').innerHTML = globalData.lichhop.map((item, i) => {
+                let id = item.id || i;
+                let actions = isAdmin ? `<td class="text-center">
+                    <button class="btn btn-sm btn-primary" onclick="openModal('lichhop', '${id}')" title="Sửa"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem('deleteLichHop', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
+                </td>` : '';
+                return `<tr>
+                    <td>${item['Tiêu đề'] || ''}</td>
+                    <td>${item['Thời gian'] ? item['Thời gian'].replace('T', ' ') : ''}</td>
+                    <td>${item['Địa điểm'] || ''}</td>
+                    <td>${item['Nội dung'] || ''}</td>
+                    ${actions}
+                </tr>`;
+            }).join('');
+        }
+
+        async function loadVanBan() {
+            let res = await apiGet('getVanBan');
+            globalData.vanban = res.data || [];
+            let isAdmin = currentUser.role === 'Admin';
+            
+            document.getElementById('thead-vanban').innerHTML = `<tr><th>Số hiệu</th><th>Tên văn bản</th><th>Ngày ban hành</th><th>Link đính kèm</th>${isAdmin ? '<th class="text-center">Thao tác</th>' : ''}</tr>`;
+
+            document.getElementById('tb-vanban').innerHTML = globalData.vanban.map((item, i) => {
+                let id = item.id || i;
+                let actions = isAdmin ? `<td class="text-center">
+                    <button class="btn btn-sm btn-primary" onclick="openModal('vanban', '${id}')" title="Sửa"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem('deleteVanBan', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
+                </td>` : '';
+                return `<tr>
+                    <td>${item['Số hiệu'] || ''}</td>
+                    <td>${item['Tên văn bản'] || ''}</td>
+                    <td>${item['Ngày ban hành'] ? item['Ngày ban hành'].split('T')[0] : ''}</td>
+                    <td><a href="${item['Link đính kèm'] || '#'}" target="_blank" class="text-primary-custom">Xem/Tải</a></td>
+                    ${actions}
+                </tr>`;
+            }).join('');
+        }
+
+        async function loadYkien() {
+            let res = await apiGet('getYkienCuTri');
+            globalData.ykien = res.data || [];
+            let isAdmin = currentUser.role === 'Admin';
+            
+            let filteredData = globalData.ykien;
+            // User chỉ thấy ý kiến đã duyệt HOẶC ý kiến chờ duyệt của chính mình
+            if (!isAdmin) {
+                filteredData = globalData.ykien.filter(item => {
+                    let st = item['Trạng thái'] || item['Trạng Thái'] || 'Chờ duyệt';
+                    let sender = item['Người gửi'] || item['Người Gửi'] || item['Tên người gửi'] || item['Tên đại biểu gửi'] || '';
+                    return st === 'Đã duyệt' || (st === 'Chờ duyệt' && sender === currentUser.fullName);
+                });
+            }
+
+            document.getElementById('thead-ykien').innerHTML = `<tr><th>Người gửi</th><th>Nội dung</th><th>Ngày gửi</th><th>Trạng thái</th><th class="text-center">Thao tác</th></tr>`;
+
+            document.getElementById('tb-ykien').innerHTML = filteredData.map((item) => {
+                let originalIndex = globalData.ykien.indexOf(item);
+                let id = item.id || originalIndex;
+                
+                // Hỗ trợ nhiều tên cột khác nhau trên Google Sheets
+                let st = item['Trạng thái'] || item['Trạng Thái'] || 'Chờ duyệt';
+                let badge = st === 'Đã duyệt' ? 'badge-approved' : (st === 'Từ chối' ? 'badge-rejected' : 'badge-pending');
+                
+                let sender = item['Người gửi'] || item['Người Gửi'] || item['Tên người gửi'] || item['Tên đại biểu gửi'] || '';
+                let dateVal = item['Ngày gửi'] || item['Ngày Gửi'] || item['Thời gian'] || '';
+                let dateStr = dateVal ? dateVal.split('T')[0] : '';
+                
+                let fullContent = item['Nội dung'] || item['Nội dung ý kiến'] || item['Nội Dung'] || item['Ý kiến'] || '';
+                let summary = fullContent.length > 50 ? fullContent.substring(0, 50) + '...' : fullContent;
+                
+                let actions = `<td class="text-center">
+                    <button class="btn btn-sm btn-info text-white mb-1" onclick="viewYkien('${id}')" title="Xem chi tiết"><i class="fas fa-eye"></i></button>`;
+                
+                if (isAdmin) {
+                    actions += `
+                        <button class="btn btn-sm btn-success mb-1" onclick="approveYkien('${id}', 'Đã duyệt')" title="Duyệt"><i class="fas fa-check"></i></button>
+                        <button class="btn btn-sm btn-warning mb-1 text-white" onclick="approveYkien('${id}', 'Từ chối')" title="Từ chối"><i class="fas fa-times"></i></button>
+                        <button class="btn btn-sm btn-danger mb-1" onclick="deleteItem('deleteYkien', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
+                    `;
+                }
+                
+                actions += `</td>`;
+
+                return `<tr>
+                    <td>${sender}</td>
+                    <td>${summary}</td>
+                    <td>${dateStr}</td>
+                    <td><span class="badge ${badge}">${st}</span></td>
+                    ${actions}
+                </tr>`;
+            }).join('');
+        }
+
+        // 7. SAVE DATA (POST)
+        async function handleSave(modalId, formId, actionAdd, actionEdit, dataObj, reloadFunc) {
+            showLoad();
+            let action = currentEditId !== null ? actionEdit : actionAdd;
+            if (currentEditId !== null) dataObj.id = currentEditId;
+            
+            let res = await apiPost({ action: action, data: dataObj });
+            hideLoad();
+            if(res.success !== false) {
+                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+                document.getElementById(formId).reset();
+                showMsg('success', currentEditId !== null ? 'Cập nhật thành công!' : 'Thêm thành công!');
+                currentEditId = null;
+                reloadFunc();
+            } else showMsg('error', 'Có lỗi xảy ra!');
+        }
+
+        function saveTaiKhoan() {
+            let data = {
+                'Họ và tên': document.getElementById('tk-hoten').value,
+                'Chức vụ hiện tại': document.getElementById('tk-chucvu').value,
+                'Quyền': document.getElementById('tk-quyen').value
+            };
+            handleSave('modalTaiKhoan', 'formTaiKhoan', 'addTaiKhoan', 'editTaiKhoan', data, loadTaiKhoan);
+        }
+
+        function saveLichHop() {
+            let data = {
+                'Tiêu đề': document.getElementById('lh-tieude').value,
+                'Thời gian': document.getElementById('lh-thoigian').value,
+                'Địa điểm': document.getElementById('lh-diadiem').value,
+                'Nội dung': document.getElementById('lh-noidung').value
+            };
+            handleSave('modalLichHop', 'formLichHop', 'addLichHop', 'editLichHop', data, loadLichHop);
+        }
+
+        function saveVanBan() {
+            let data = {
+                'Số hiệu': document.getElementById('vb-sohieu').value,
+                'Tên văn bản': document.getElementById('vb-ten').value,
+                'Ngày ban hành': document.getElementById('vb-ngay').value,
+                'Link đính kèm': document.getElementById('vb-link').value
+            };
+            handleSave('modalVanBan', 'formVanBan', 'addVanBan', 'editVanBan', data, loadVanBan);
+        }
+
+        async function saveDoiMatKhau() {
+            let oldP = document.getElementById('mk-cu').value;
+            let newP = document.getElementById('mk-moi').value;
+            let confirmP = document.getElementById('mk-xacnhan').value;
+            
+            if (newP !== confirmP) {
+                Swal.fire('Lỗi', 'Mật khẩu xác nhận không khớp!', 'error');
+                return;
+            }
+            
+            showLoad();
+            let res = await apiPost({ action: 'changePassword', username: currentUser.username, oldPassword: oldP, newPassword: newP });
+            hideLoad();
+            
+            if(res.success !== false) {
+                bootstrap.Modal.getInstance(document.getElementById('modalDoiMatKhau')).hide();
+                document.getElementById('formDoiMatKhau').reset();
+                Swal.fire('Thành công', 'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.', 'success').then(() => {
+                    logout(true);
+                });
+            } else {
+                Swal.fire('Lỗi', 'Mật khẩu cũ không đúng hoặc có lỗi xảy ra!', 'error');
+            }
+        }
+
+        // 8. DELETE DATA
+        function deleteItem(action, id) {
+            Swal.fire({title: 'Xác nhận xóa?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#8b0000'}).then(async (r) => {
+                if(r.isConfirmed) {
+                    showLoad();
+                    let res = await apiPost({ action: action, id: id });
+                    hideLoad();
+                    if(res.success !== false) {
+                        showMsg('success', 'Đã xóa!');
+                        if(action==='deleteTaiKhoan') loadTaiKhoan();
+                        if(action==='deleteLichHop') loadLichHop();
+                        if(action==='deleteVanBan') loadVanBan();
+                        if(action==='deleteYkien') loadYkien();
+                    } else showMsg('error', 'Lỗi khi xóa!');
+                }
+            });
+        }
+
+        // 9. Ý KIẾN CỬ TRI LOGIC
+        async function submitYkien(e) {
+            e.preventDefault();
+            let content = document.getElementById('ykien-content').value;
+            showLoad();
+            let res = await apiPost({ action: 'submitOpinion', delegateName: currentUser?.fullName || 'Đại biểu', content: content });
+            hideLoad();
+            if(res.success !== false) {
+                document.getElementById('formYkien').reset();
+                showMsg('success', 'Đã gửi ý kiến!');
+                loadYkien();
+            } else showMsg('error', 'Lỗi khi gửi!');
+        }
+
+        async function approveYkien(id, status) {
+            showLoad();
+            let res = await apiPost({ action: 'approveYkien', id: id, status: status });
+            hideLoad();
+            if(res.success !== false) {
+                showMsg('success', 'Đã cập nhật trạng thái!');
+                loadYkien();
+            } else showMsg('error', 'Lỗi cập nhật!');
+        }
+
+        function viewYkien(id) {
+            let item = globalData.ykien.find((x, i) => (x.id || i) == id);
+            if(item) {
+                let sender = item['Người gửi'] || item['Người Gửi'] || item['Tên người gửi'] || item['Tên đại biểu gửi'] || '';
+                let dateVal = item['Ngày gửi'] || item['Ngày Gửi'] || item['Thời gian'] || '';
+                let dateStr = dateVal ? dateVal.split('T')[0] : '';
+                
+                document.getElementById('ct-nguoigui').innerText = sender;
+                document.getElementById('ct-ngaygui').innerText = dateStr;
+                
+                let st = item['Trạng thái'] || item['Trạng Thái'] || 'Chờ duyệt';
+                let badge = st === 'Đã duyệt' ? 'badge-approved' : (st === 'Từ chối' ? 'badge-rejected' : 'badge-pending');
+                document.getElementById('ct-trangthai').innerHTML = `<span class="badge ${badge}">${st}</span>`;
+                
+                // Hỗ trợ nhiều tên cột khác nhau
+                let fullContent = item['Nội dung'] || item['Nội dung ý kiến'] || item['Nội Dung'] || item['Ý kiến'] || '';
+                document.getElementById('ct-noidung').textContent = fullContent;
+                
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('modalChiTietYkien')).show();
+            }
+        }
+    </script>
+</body>
+</html>

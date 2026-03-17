@@ -1,0 +1,19 @@
+[build]
+  # Thư mục chứa file index.html (thư mục gốc)
+  publish = "."
+
+# Cấu hình chuyển hướng (Redirects)
+# Rất hữu ích cho các ứng dụng Single Page Application (SPA)
+# Đảm bảo khi người dùng tải lại trang (F5) không bị lỗi 404
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Cấu hình Headers bảo mật cơ bản
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
