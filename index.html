@@ -131,7 +131,7 @@
                     </div>
                     <div class="card-body p-0 table-responsive">
                         <table class="table table-hover m-0">
-                            <thead id="thead-vanban"><tr><th>Số hiệu</th><th>Tên văn bản</th><th>Ngày ban hành</th><th>Link đính kèm</th><th class="text-center">Thao tác</th></tr></thead>
+                            <thead id="thead-vanban"><tr><th>Số hiệu</th><th>Tên văn bản</th><th>Thời gian ban hành</th><th>Link đính kèm</th><th class="text-center">Thao tác</th></tr></thead>
                             <tbody id="tb-vanban"></tbody>
                         </table>
                     </div>
@@ -228,7 +228,7 @@
                 <form id="formVanBan">
                     <div class="mb-2"><label class="fw-bold">Số hiệu</label><input type="text" class="form-control" id="vb-sohieu" required></div>
                     <div class="mb-2"><label class="fw-bold">Tên văn bản</label><input type="text" class="form-control" id="vb-ten" required></div>
-                    <div class="mb-2"><label class="fw-bold">Ngày ban hành</label><input type="date" class="form-control" id="vb-ngay" required></div>
+                    <div class="mb-2"><label class="fw-bold">Thời gian ban hành</label><input type="date" class="form-control" id="vb-ngay" required></div>
                     <div class="mb-2"><label class="fw-bold">Link đính kèm</label><input type="url" class="form-control" id="vb-link" required></div>
                 </form>
             </div>
@@ -275,6 +275,143 @@
         const showLoad = () => Swal.fire({title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
         const hideLoad = () => Swal.close();
         const showMsg = (icon, msg) => Swal.fire({icon: icon, title: msg, timer: 2000, showConfirmButton: false});
+
+        function formatDateTime(dateStr, includeTime = false) {
+            if (!dateStr) return '';
+            let str = String(dateStr).trim();
+            
+            if (str.includes('T')) {
+                let d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                    let dd = String(d.getDate()).padStart(2, '0');
+                    let mm = String(d.getMonth() + 1).padStart(2, '0');
+                    let yyyy = d.getFullYear();
+                    if (includeTime) {
+                        let hh = String(d.getHours()).padStart(2, '0');
+                        let min = String(d.getMinutes()).padStart(2, '0');
+                        return `${hh}:${min} ${dd}/${mm}/${yyyy}`;
+                    }
+                    return `${dd}/${mm}/${yyyy}`;
+                }
+            }
+            
+            let parts = str.split(' ');
+            let datePart = parts[0];
+            let timePart = parts[1] || '';
+            
+            let dd, mm, yyyy;
+            if (datePart.includes('/')) {
+                let dParts = datePart.split('/');
+                if (dParts.length === 3) {
+                    dd = dParts[0].padStart(2, '0');
+                    mm = dParts[1].padStart(2, '0');
+                    yyyy = dParts[2];
+                }
+            } else if (datePart.includes('-')) {
+                let dParts = datePart.split('-');
+                if (dParts.length === 3) {
+                    yyyy = dParts[0];
+                    mm = dParts[1].padStart(2, '0');
+                    dd = dParts[2].padStart(2, '0');
+                }
+            }
+            
+            if (dd && mm && yyyy) {
+                if (includeTime) {
+                    let hh = '00', min = '00';
+                    if (timePart) {
+                        let tParts = timePart.split(':');
+                        hh = (tParts[0] || '00').padStart(2, '0');
+                        min = (tParts[1] || '00').padStart(2, '0');
+                    }
+                    return `${hh}:${min} ${dd}/${mm}/${yyyy}`;
+                }
+                return `${dd}/${mm}/${yyyy}`;
+            }
+            
+            return str;
+        }
+
+        function parseToInputFormat(dateStr, includeTime = false) {
+            if (!dateStr) return '';
+            let str = String(dateStr).trim();
+            
+            if (str.includes('T')) {
+                let d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                    let dd = String(d.getDate()).padStart(2, '0');
+                    let mm = String(d.getMonth() + 1).padStart(2, '0');
+                    let yyyy = d.getFullYear();
+                    if (includeTime) {
+                        let hh = String(d.getHours()).padStart(2, '0');
+                        let min = String(d.getMinutes()).padStart(2, '0');
+                        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+                    }
+                    return `${yyyy}-${mm}-${dd}`;
+                }
+            }
+            
+            let parts = str.split(' ');
+            let datePart = parts[0];
+            let timePart = parts[1] || '';
+            
+            let dd, mm, yyyy;
+            if (datePart.includes('/')) {
+                let dParts = datePart.split('/');
+                if (dParts.length === 3) {
+                    dd = dParts[0].padStart(2, '0');
+                    mm = dParts[1].padStart(2, '0');
+                    yyyy = dParts[2];
+                }
+            } else if (datePart.includes('-')) {
+                let dParts = datePart.split('-');
+                if (dParts.length === 3) {
+                    yyyy = dParts[0];
+                    mm = dParts[1].padStart(2, '0');
+                    dd = dParts[2].padStart(2, '0');
+                }
+            }
+            
+            if (dd && mm && yyyy) {
+                if (includeTime) {
+                    let hh = '00', min = '00';
+                    if (timePart) {
+                        let tParts = timePart.split(':');
+                        hh = (tParts[0] || '00').padStart(2, '0');
+                        min = (tParts[1] || '00').padStart(2, '0');
+                    }
+                    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+                }
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            
+            return str;
+        }
+
+        function formatForSave(dateStr, includeTime = false) {
+            if (!dateStr) return '';
+            // dateStr from input type="date" is YYYY-MM-DD
+            // dateStr from input type="datetime-local" is YYYY-MM-DDTHH:mm
+            let str = String(dateStr).trim();
+            let datePart = str.split('T')[0];
+            let timePart = str.split('T')[1] || '';
+            
+            let dParts = datePart.split('-');
+            if (dParts.length === 3) {
+                let yyyy = dParts[0];
+                let mm = dParts[1];
+                let dd = dParts[2];
+                
+                if (includeTime) {
+                    let tParts = timePart.split(':');
+                    let hh = tParts[0] || '00';
+                    let min = tParts[1] || '00';
+                    return `${dd}/${mm}/${yyyy} ${hh}:${min}:00`;
+                }
+                return `${dd}/${mm}/${yyyy}`;
+            }
+            return str;
+        }
 
         // 3. API WRAPPERS (SỬ DỤNG GOOGLE APPS SCRIPT)
         async function apiGet(action) {
@@ -389,7 +526,7 @@
                     let item = globalData.lichhop.find((x, i) => (x.id || i) == id);
                     if(item) {
                         document.getElementById('lh-tieude').value = item['Tiêu đề'] || '';
-                        document.getElementById('lh-thoigian').value = item['Thời gian'] ? item['Thời gian'].slice(0,16) : '';
+                        document.getElementById('lh-thoigian').value = parseToInputFormat(item['Thời gian'], true);
                         document.getElementById('lh-diadiem').value = item['Địa điểm'] || '';
                         document.getElementById('lh-noidung').value = item['Nội dung'] || '';
                     }
@@ -405,8 +542,9 @@
                     if(item) {
                         document.getElementById('vb-sohieu').value = item['Số hiệu'] || '';
                         document.getElementById('vb-ten').value = item['Tên văn bản'] || '';
-                        let dateVal = item['Ngày ban hành'] ? new Date(item['Ngày ban hành']).toISOString().split('T')[0] : '';
-                        document.getElementById('vb-ngay').value = dateVal;
+                        
+                        let ngay = item['Thời gian ban hành'] || item['Ngày ban hành'] || item['Ngày ban hàn'] || '';
+                        document.getElementById('vb-ngay').value = parseToInputFormat(ngay, false);
                         document.getElementById('vb-link').value = item['Link đính kèm'] || '';
                     }
                 } else {
@@ -458,7 +596,7 @@
                 </td>` : '';
                 return `<tr>
                     <td>${item['Tiêu đề'] || ''}</td>
-                    <td>${item['Thời gian'] ? item['Thời gian'].replace('T', ' ') : ''}</td>
+                    <td>${formatDateTime(item['Thời gian'], true)}</td>
                     <td>${item['Địa điểm'] || ''}</td>
                     <td>${item['Nội dung'] || ''}</td>
                     ${actions}
@@ -471,7 +609,7 @@
             globalData.vanban = res.data || [];
             let isAdmin = currentUser.role === 'Admin';
             
-            document.getElementById('thead-vanban').innerHTML = `<tr><th>Số hiệu</th><th>Tên văn bản</th><th>Ngày ban hành</th><th>Link đính kèm</th>${isAdmin ? '<th class="text-center">Thao tác</th>' : ''}</tr>`;
+            document.getElementById('thead-vanban').innerHTML = `<tr><th>Số hiệu</th><th>Tên văn bản</th><th>Thời gian ban hành</th><th>Link đính kèm</th>${isAdmin ? '<th class="text-center">Thao tác</th>' : ''}</tr>`;
 
             document.getElementById('tb-vanban').innerHTML = globalData.vanban.map((item, i) => {
                 let id = item.id || i;
@@ -479,10 +617,14 @@
                     <button class="btn btn-sm btn-primary" onclick="openModal('vanban', '${id}')" title="Sửa"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger" onclick="deleteItem('deleteVanBan', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
                 </td>` : '';
+                
+                let ngay = item['Thời gian ban hành'] || item['Ngày ban hành'] || item['Ngày ban hàn'] || '';
+                let displayDate = formatDateTime(ngay, false);
+
                 return `<tr>
                     <td>${item['Số hiệu'] || ''}</td>
                     <td>${item['Tên văn bản'] || ''}</td>
-                    <td>${item['Ngày ban hành'] ? item['Ngày ban hành'].split('T')[0] : ''}</td>
+                    <td>${displayDate}</td>
                     <td><a href="${item['Link đính kèm'] || '#'}" target="_blank" class="text-primary-custom">Xem/Tải</a></td>
                     ${actions}
                 </tr>`;
@@ -516,7 +658,7 @@
                 
                 let sender = item['Người gửi'] || item['Người Gửi'] || item['Tên người gửi'] || item['Tên đại biểu gửi'] || '';
                 let dateVal = item['Ngày gửi'] || item['Ngày Gửi'] || item['Thời gian'] || '';
-                let dateStr = dateVal ? dateVal.split('T')[0] : '';
+                let dateStr = formatDateTime(dateVal, false);
                 
                 let fullContent = item['Nội dung'] || item['Nội dung ý kiến'] || item['Nội Dung'] || item['Ý kiến'] || '';
                 let summary = fullContent.length > 50 ? fullContent.substring(0, 50) + '...' : fullContent;
@@ -573,7 +715,7 @@
         function saveLichHop() {
             let data = {
                 'Tiêu đề': document.getElementById('lh-tieude').value,
-                'Thời gian': document.getElementById('lh-thoigian').value,
+                'Thời gian': formatForSave(document.getElementById('lh-thoigian').value, true),
                 'Địa điểm': document.getElementById('lh-diadiem').value,
                 'Nội dung': document.getElementById('lh-noidung').value
             };
@@ -584,7 +726,9 @@
             let data = {
                 'Số hiệu': document.getElementById('vb-sohieu').value,
                 'Tên văn bản': document.getElementById('vb-ten').value,
-                'Ngày ban hành': document.getElementById('vb-ngay').value,
+                'Ngày ban hành': formatForSave(document.getElementById('vb-ngay').value, false),
+                'Ngày ban hàn': formatForSave(document.getElementById('vb-ngay').value, false),
+                'Thời gian ban hành': formatForSave(document.getElementById('vb-ngay').value, false),
                 'Link đính kèm': document.getElementById('vb-link').value
             };
             handleSave('modalVanBan', 'formVanBan', 'addVanBan', 'editVanBan', data, loadVanBan);
@@ -662,7 +806,7 @@
             if(item) {
                 let sender = item['Người gửi'] || item['Người Gửi'] || item['Tên người gửi'] || item['Tên đại biểu gửi'] || '';
                 let dateVal = item['Ngày gửi'] || item['Ngày Gửi'] || item['Thời gian'] || '';
-                let dateStr = dateVal ? dateVal.split('T')[0] : '';
+                let dateStr = formatDateTime(dateVal, false);
                 
                 document.getElementById('ct-nguoigui').innerText = sender;
                 document.getElementById('ct-ngaygui').innerText = dateStr;
