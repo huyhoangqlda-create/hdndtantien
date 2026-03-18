@@ -77,6 +77,7 @@
             <div class="nav-item" id="nav-lichhop" onclick="switchTab('tab-lichhop', this)"><i class="fas fa-calendar-alt"></i> Quản lý Lịch họp</div>
             <div class="nav-item" id="nav-vanban" onclick="switchTab('tab-vanban', this)"><i class="fas fa-file-signature"></i> Quản lý Văn bản</div>
             <div class="nav-item" id="nav-ykien" onclick="switchTab('tab-ykien', this)"><i class="fas fa-comments"></i> Quản lý Ý kiến cử tri</div>
+            <div class="nav-item" id="nav-cocau" onclick="switchTab('tab-cocau', this); loadCoCauToChuc();"><i class="fas fa-sitemap"></i> Cơ cấu tổ chức HĐND</div>
             <div class="nav-item mt-auto border-top" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
         </div>
 
@@ -156,6 +157,70 @@
                             <thead id="thead-ykien"><tr><th>Người gửi</th><th>Nội dung</th><th>Ngày gửi</th><th>Trạng thái</th><th class="text-center">Thao tác</th></tr></thead>
                             <tbody id="tb-ykien"></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: CƠ CẤU TỔ CHỨC HĐND -->
+            <div id="tab-cocau" class="tab-pane">
+                <ul class="nav nav-tabs mb-3" id="cocauTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="daibieu-tab" data-bs-toggle="tab" data-bs-target="#daibieu" type="button" role="tab">Đại biểu HĐND</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="todaibieu-tab" data-bs-toggle="tab" data-bs-target="#todaibieu" type="button" role="tab">Tổ đại biểu</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="banktns-tab" data-bs-toggle="tab" data-bs-target="#banktns" type="button" role="tab">Ban Kinh tế - Ngân sách</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="banvhxh-tab" data-bs-toggle="tab" data-bs-target="#banvhxh" type="button" role="tab">Ban Văn hóa - Xã hội</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="cocauTabsContent">
+                    <!-- Đại biểu HĐND -->
+                    <div class="tab-pane fade show active" id="daibieu" role="tabpanel">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header card-header-custom">Danh sách Đại biểu HĐND phường</div>
+                            <div class="card-body p-0 table-responsive">
+                                <table class="table table-hover m-0">
+                                    <thead><tr><th>STT</th><th>Họ và tên</th><th>Chức vụ</th><th>Số điện thoại</th></tr></thead>
+                                    <tbody id="tb-daibieu"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tổ đại biểu -->
+                    <div class="tab-pane fade" id="todaibieu" role="tabpanel">
+                        <div id="container-todaibieu"></div>
+                    </div>
+
+                    <!-- Ban KTNS -->
+                    <div class="tab-pane fade" id="banktns" role="tabpanel">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header card-header-custom">Danh sách thành viên Ban Kinh tế - Ngân sách</div>
+                            <div class="card-body p-0 table-responsive">
+                                <table class="table table-hover m-0">
+                                    <thead><tr><th>STT</th><th>Họ và tên</th><th>Nghề nghiệp chức vụ</th><th>Chức vụ trong Ban</th></tr></thead>
+                                    <tbody id="tb-banktns"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ban VHXH -->
+                    <div class="tab-pane fade" id="banvhxh" role="tabpanel">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header card-header-custom">Danh sách thành viên Ban Văn hóa - Xã hội</div>
+                            <div class="card-body p-0 table-responsive">
+                                <table class="table table-hover m-0">
+                                    <thead><tr><th>STT</th><th>Họ và tên</th><th>Nghề nghiệp chức vụ</th><th>Chức vụ trong Ban</th></tr></thead>
+                                    <tbody id="tb-banvhxh"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -247,9 +312,35 @@
                 <div class="mb-2"><strong>Ngày gửi:</strong> <span id="ct-ngaygui"></span></div>
                 <div class="mb-2"><strong>Trạng thái:</strong> <span id="ct-trangthai"></span></div>
                 <div class="mb-2"><strong>Nội dung:</strong></div>
-                <div class="p-2 border rounded bg-light" id="ct-noidung" style="min-height: 80px; white-space: pre-wrap;"></div>
+                <div class="p-2 border rounded bg-light mb-2" id="ct-noidung" style="min-height: 80px; white-space: pre-wrap;"></div>
+                <div class="mb-2"><strong>Cơ quan giải quyết:</strong> <span id="ct-coquan"></span></div>
+                <div class="mb-2"><strong>Kết quả giải quyết:</strong></div>
+                <div class="p-2 border rounded bg-light" id="ct-ketqua" style="min-height: 60px; white-space: pre-wrap;"></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button></div>
+        </div></div>
+    </div>
+
+    <!-- Modal Cập nhật Ý kiến (Admin) -->
+    <div class="modal fade" id="modalCapNhatYkien" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Cập nhật kết quả giải quyết</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCapNhatYkien" onsubmit="submitCapNhatYkien(event)">
+                    <input type="hidden" id="capnhat-ykien-id">
+                    <div class="mb-3">
+                        <label class="form-label">Cơ quan giải quyết</label>
+                        <input type="text" class="form-control" id="capnhat-coquan" placeholder="Nhập tên cơ quan...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kết quả giải quyết</label>
+                        <textarea class="form-control" id="capnhat-ketqua" rows="4" placeholder="Nhập kết quả giải quyết..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save"></i> Lưu Cập Nhật</button>
+                </form>
+            </div>
         </div></div>
     </div>
 
@@ -259,7 +350,7 @@
     <!-- JAVASCRIPT LOGIC & API -->
     <script>
         // 1. KHAI BÁO BIẾN TOÀN CỤC
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw2xgMU3wV-L3bo2CtK63YJK-2_Etaa5Pqg8vuD8rMziBuyGVs6YvisxFObyJIJPayOuA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxR1O8-bgfElxNlh9Mr1E3cniFUPw3-RnxuUTxyzEsR3NtG6fPA7wZKK0yCzJ1Mc1df6g/exec';
         let currentUser = null;
         let currentEditId = null;
         let globalData = { taikhoan: [], lichhop: [], vanban: [], ykien: [] };
@@ -668,6 +759,7 @@
                 
                 if (isAdmin) {
                     actions += `
+                        <button class="btn btn-sm btn-primary mb-1" onclick="openCapNhatYkien('${id}')" title="Cập nhật kết quả"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-success mb-1" onclick="approveYkien('${id}', 'Đã duyệt')" title="Duyệt"><i class="fas fa-check"></i></button>
                         <button class="btn btn-sm btn-warning mb-1 text-white" onclick="approveYkien('${id}', 'Từ chối')" title="Từ chối"><i class="fas fa-times"></i></button>
                         <button class="btn btn-sm btn-danger mb-1" onclick="deleteItem('deleteYkien', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
@@ -684,6 +776,100 @@
                     ${actions}
                 </tr>`;
             }).join('');
+        }
+
+        async function loadCoCauToChuc() {
+            showLoad();
+            try {
+                // Load Đại biểu
+                let resDb = await apiGet('getDaiBieu');
+                let dataDb = resDb.data || [];
+                document.getElementById('tb-daibieu').innerHTML = dataDb.map((item, i) => {
+                    return `<tr>
+                        <td>${item['STT'] || (i + 1)}</td>
+                        <td>${item['Họ và Tên'] || item['Họ và tên'] || ''}</td>
+                        <td>${item['Chức vụ'] || ''}</td>
+                        <td>${item['Số điện thoại'] || item['số điện thoại'] || item['Số điện thoại liên hệ'] || ''}</td>
+                    </tr>`;
+                }).join('');
+
+                // Load Tổ đại biểu
+                let resTdb = await apiGet('getToDaiBieu');
+                let dataTdb = resTdb.data || [];
+                let toGroups = {};
+                dataTdb.forEach(item => {
+                    let toSo = item['Tổ số'] || item['Tổ'] || 'Khác';
+                    let khuVuc = item['Khu vực'] || item['khu vực'] || '';
+                    let key = toSo + '|' + khuVuc;
+                    if (!toGroups[key]) toGroups[key] = { toSo, khuVuc, members: [] };
+                    toGroups[key].members.push(item);
+                });
+
+                let htmlTdb = '';
+                for (let key in toGroups) {
+                    let group = toGroups[key];
+                    // Sort members: Tổ trưởng -> Tổ phó -> others
+                    group.members.sort((a, b) => {
+                        let roleA = (a['Chức vụ trong tổ'] || '').toLowerCase();
+                        let roleB = (b['Chức vụ trong tổ'] || '').toLowerCase();
+                        
+                        let scoreA = roleA.includes('trưởng') ? 1 : (roleA.includes('phó') ? 2 : 3);
+                        let scoreB = roleB.includes('trưởng') ? 1 : (roleB.includes('phó') ? 2 : 3);
+                        
+                        return scoreA - scoreB;
+                    });
+
+                    htmlTdb += `
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header card-header-custom bg-secondary">
+                            <h6 class="m-0 fw-bold">Tổ số: ${group.toSo} - Khu vực: ${group.khuVuc}</h6>
+                        </div>
+                        <div class="card-body p-0 table-responsive">
+                            <table class="table table-hover m-0">
+                                <thead><tr><th>STT</th><th>Họ và tên</th><th>Chức vụ trong tổ</th><th>Chức vụ</th></tr></thead>
+                                <tbody>
+                                    ${group.members.map((m, i) => `
+                                        <tr>
+                                            <td>${m['STT'] || (i + 1)}</td>
+                                            <td>${m['Họ và tên'] || m['Họ và Tên'] || ''}</td>
+                                            <td>${m['Chức vụ trong tổ'] || ''}</td>
+                                            <td>${m['Chức vụ'] || ''}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
+                }
+                document.getElementById('container-todaibieu').innerHTML = htmlTdb;
+
+                // Load Ban KTNS
+                let resKtns = await apiGet('getBanKtns');
+                let dataKtns = resKtns.data || [];
+                document.getElementById('tb-banktns').innerHTML = dataKtns.map((item, i) => {
+                    return `<tr>
+                        <td>${item['STT'] || (i + 1)}</td>
+                        <td>${item['Họ và tên'] || item['Họ và Tên'] || ''}</td>
+                        <td>${item['Nghề nghiệp chức vụ'] || item['Nghề nghiệp, chức vụ'] || item['Chức vụ'] || ''}</td>
+                        <td>${item['Chức vụ trong Ban'] || ''}</td>
+                    </tr>`;
+                }).join('');
+
+                // Load Ban VHXH
+                let resVhxh = await apiGet('getBanVhxh');
+                let dataVhxh = resVhxh.data || [];
+                document.getElementById('tb-banvhxh').innerHTML = dataVhxh.map((item, i) => {
+                    return `<tr>
+                        <td>${item['STT'] || (i + 1)}</td>
+                        <td>${item['Họ và tên'] || item['Họ và Tên'] || ''}</td>
+                        <td>${item['Nghề nghiệp chức vụ'] || item['Nghề nghiệp, chức vụ'] || item['Chức vụ'] || ''}</td>
+                        <td>${item['Chức vụ trong Ban'] || ''}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                console.error(e);
+            }
+            hideLoad();
         }
 
         // 7. SAVE DATA (POST)
@@ -819,7 +1005,47 @@
                 let fullContent = item['Nội dung'] || item['Nội dung ý kiến'] || item['Nội Dung'] || item['Ý kiến'] || '';
                 document.getElementById('ct-noidung').textContent = fullContent;
                 
+                // Cơ quan và kết quả
+                let coquan = item['Cơ quan giải quyết'] || item['cơ quan giải quyết'] || '';
+                let ketqua = item['Kết quả giải quyết'] || item['kết quả giải quyết'] || '';
+                document.getElementById('ct-coquan').innerText = coquan;
+                document.getElementById('ct-ketqua').textContent = ketqua;
+                
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('modalChiTietYkien')).show();
+            }
+        }
+
+        function openCapNhatYkien(id) {
+            let item = globalData.ykien.find((x, i) => (x.id || i) == id);
+            if(item) {
+                document.getElementById('capnhat-ykien-id').value = id;
+                document.getElementById('capnhat-coquan').value = item['Cơ quan giải quyết'] || item['cơ quan giải quyết'] || '';
+                document.getElementById('capnhat-ketqua').value = item['Kết quả giải quyết'] || item['kết quả giải quyết'] || '';
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCapNhatYkien')).show();
+            }
+        }
+
+        async function submitCapNhatYkien(e) {
+            e.preventDefault();
+            let id = document.getElementById('capnhat-ykien-id').value;
+            let coquan = document.getElementById('capnhat-coquan').value;
+            let ketqua = document.getElementById('capnhat-ketqua').value;
+            
+            showLoad();
+            let res = await apiPost({ 
+                action: 'updateYkienResult', 
+                id: id, 
+                coquan: coquan,
+                ketqua: ketqua
+            });
+            hideLoad();
+            
+            if(res.success !== false) {
+                bootstrap.Modal.getInstance(document.getElementById('modalCapNhatYkien')).hide();
+                showMsg('success', 'Đã cập nhật kết quả giải quyết!');
+                loadYkien();
+            } else {
+                showMsg('error', 'Lỗi cập nhật!');
             }
         }
     </script>
