@@ -42,6 +42,7 @@
         .table th { background-color: var(--primary); color: white; }
         .table th, .table td { white-space: nowrap; vertical-align: middle; }
         .badge-pending { background-color: #ffc107; color: #000; }
+        .badge-processing { background-color: #0d6efd; color: #fff; }
         .badge-approved { background-color: #198754; color: #fff; }
         .badge-rejected { background-color: #dc3545; color: #fff; }
         
@@ -810,7 +811,16 @@
                 
                 // Hỗ trợ nhiều tên cột khác nhau trên Google Sheets
                 let st = item['Trạng thái'] || item['Trạng Thái'] || 'Chờ duyệt';
-                let badge = st === 'Đã duyệt' ? 'badge-approved' : (st === 'Từ chối' ? 'badge-rejected' : 'badge-pending');
+                let ketqua = item['Kết quả giải quyết'] || item['kết quả giải quyết'] || '';
+                
+                if (!isAdmin && st === 'Đã duyệt') {
+                    st = ketqua.trim() !== '' ? 'Đã giải quyết' : 'Đang xử lý';
+                }
+                
+                let badge = 'badge-pending';
+                if (st === 'Đã duyệt' || st === 'Đã giải quyết') badge = 'badge-approved';
+                else if (st === 'Đang xử lý') badge = 'badge-processing';
+                else if (st === 'Từ chối') badge = 'badge-rejected';
                 
                 let sender = item['Người gửi'] || item['Người Gửi'] || item['Tên người gửi'] || item['Tên đại biểu gửi'] || '';
                 let dateVal = item['Ngày gửi'] || item['Ngày Gửi'] || item['Thời gian'] || '';
@@ -1063,7 +1073,18 @@
                 document.getElementById('ct-ngaygui').innerText = dateStr;
                 
                 let st = item['Trạng thái'] || item['Trạng Thái'] || 'Chờ duyệt';
-                let badge = st === 'Đã duyệt' ? 'badge-approved' : (st === 'Từ chối' ? 'badge-rejected' : 'badge-pending');
+                let ketqua = item['Kết quả giải quyết'] || item['kết quả giải quyết'] || '';
+                let isAdmin = currentUser && currentUser.role === 'Admin';
+                
+                if (!isAdmin && st === 'Đã duyệt') {
+                    st = ketqua.trim() !== '' ? 'Đã giải quyết' : 'Đang xử lý';
+                }
+                
+                let badge = 'badge-pending';
+                if (st === 'Đã duyệt' || st === 'Đã giải quyết') badge = 'badge-approved';
+                else if (st === 'Đang xử lý') badge = 'badge-processing';
+                else if (st === 'Từ chối') badge = 'badge-rejected';
+                
                 document.getElementById('ct-trangthai').innerHTML = `<span class="badge ${badge}">${st}</span>`;
                 
                 // Hỗ trợ nhiều tên cột khác nhau
@@ -1072,7 +1093,6 @@
                 
                 // Cơ quan và kết quả
                 let coquan = item['Cơ quan giải quyết'] || item['cơ quan giải quyết'] || '';
-                let ketqua = item['Kết quả giải quyết'] || item['kết quả giải quyết'] || '';
                 document.getElementById('ct-coquan').innerText = coquan;
                 document.getElementById('ct-ketqua').textContent = ketqua;
                 
