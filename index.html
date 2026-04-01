@@ -50,7 +50,8 @@
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
-                left: -250px;
+                left: -260px;
+                width: 260px;
                 top: 0;
                 bottom: 0;
                 z-index: 1040;
@@ -58,6 +59,7 @@
             }
             .sidebar.show {
                 left: 0;
+                box-shadow: 3px 0 15px rgba(0,0,0,0.3);
             }
             .sidebar-overlay {
                 display: none;
@@ -86,6 +88,67 @@
             .nav-tabs .nav-link {
                 white-space: nowrap;
             }
+            .btn-sm {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Responsive Table to Cards */
+            .table, .table tbody, .table tr, .table td {
+                display: block;
+                width: 100%;
+            }
+            .table thead {
+                display: none;
+            }
+            .table tr {
+                margin-bottom: 15px;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background: #fff;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                overflow: hidden;
+            }
+            .table td {
+                text-align: right;
+                padding: 10px 15px 10px 45% !important;
+                position: relative;
+                border-bottom: 1px solid #f0f0f0;
+                white-space: normal !important;
+                min-height: 40px;
+                word-break: break-word;
+            }
+            .table td:last-child {
+                border-bottom: 0;
+            }
+            .table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                width: 40%;
+                padding-right: 10px;
+                text-align: left;
+                font-weight: bold;
+                color: var(--primary);
+                top: 10px;
+            }
+            .table td.text-center {
+                text-align: center !important;
+                padding-left: 15px !important;
+                padding-top: 15px !important;
+            }
+            .table td.text-center::before {
+                display: none;
+            }
+        }
+        
+        /* Spacing for action buttons in tables */
+        .table td .btn {
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+        .table td .btn:last-child {
+            margin-right: 0;
         }
     </style>
 </head>
@@ -195,8 +258,8 @@
                     <div class="card-header card-header-custom">Gửi ý kiến mới</div>
                     <div class="card-body">
                         <form id="formYkien" onsubmit="submitYkien(event)">
-                            <textarea class="form-control mb-2" id="ykien-content" rows="2" placeholder="Nhập nội dung ý kiến..." required></textarea>
-                            <button type="submit" class="btn btn-custom btn-sm"><i class="fas fa-paper-plane"></i> Gửi Ý Kiến</button>
+                            <textarea class="form-control mb-2" id="ykien-content" rows="3" placeholder="Nhập nội dung ý kiến..." required></textarea>
+                            <button type="submit" class="btn btn-custom"><i class="fas fa-paper-plane"></i> Gửi Ý Kiến</button>
                         </form>
                     </div>
                 </div>
@@ -235,7 +298,7 @@
                             <div class="card-header card-header-custom">Danh sách Đại biểu HĐND phường</div>
                             <div class="card-body p-0 table-responsive">
                                 <table class="table table-hover m-0">
-                                    <thead><tr><th>STT</th><th>Họ và tên</th><th>Chức vụ</th><th>Số điện thoại</th></tr></thead>
+                                    <thead><tr><th>Họ và tên</th><th>Chức vụ</th><th>Số điện thoại</th></tr></thead>
                                     <tbody id="tb-daibieu"></tbody>
                                 </table>
                             </div>
@@ -253,7 +316,7 @@
                             <div class="card-header card-header-custom">Danh sách thành viên Ban Kinh tế - Ngân sách</div>
                             <div class="card-body p-0 table-responsive">
                                 <table class="table table-hover m-0">
-                                    <thead><tr><th>STT</th><th>Họ và tên</th><th>Nghề nghiệp chức vụ</th><th>Chức vụ trong Ban</th></tr></thead>
+                                    <thead><tr><th>Họ và tên</th><th>Nghề nghiệp chức vụ</th><th>Chức vụ trong Ban</th></tr></thead>
                                     <tbody id="tb-banktns"></tbody>
                                 </table>
                             </div>
@@ -266,7 +329,7 @@
                             <div class="card-header card-header-custom">Danh sách thành viên Ban Văn hóa - Xã hội</div>
                             <div class="card-body p-0 table-responsive">
                                 <table class="table table-hover m-0">
-                                    <thead><tr><th>STT</th><th>Họ và tên</th><th>Nghề nghiệp chức vụ</th><th>Chức vụ trong Ban</th></tr></thead>
+                                    <thead><tr><th>Họ và tên</th><th>Nghề nghiệp chức vụ</th><th>Chức vụ trong Ban</th></tr></thead>
                                     <tbody id="tb-banvhxh"></tbody>
                                 </table>
                             </div>
@@ -280,7 +343,7 @@
     <!-- MODALS -->
     <!-- Modal Đổi Mật Khẩu -->
     <div class="modal fade" id="modalDoiMatKhau" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
             <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
                 <h5 class="modal-title">Đổi mật khẩu</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -297,7 +360,7 @@
 
     <!-- Modal Tài khoản -->
     <div class="modal fade" id="modalTaiKhoan" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
             <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
                 <h5 class="modal-title" id="modalTaiKhoanTitle">Thêm Đại biểu mới</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -317,7 +380,7 @@
 
     <!-- Modal Lịch họp -->
     <div class="modal fade" id="modalLichHop" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
             <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
                 <h5 class="modal-title" id="modalLichHopTitle">Thêm Lịch họp</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -335,7 +398,7 @@
 
     <!-- Modal Văn bản -->
     <div class="modal fade" id="modalVanBan" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
             <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
                 <h5 class="modal-title" id="modalVanBanTitle">Thêm Văn bản</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -353,7 +416,7 @@
 
     <!-- Modal Chi tiết Ý kiến -->
     <div class="modal fade" id="modalChiTietYkien" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
             <div class="modal-header bg-danger text-white" style="background-color: var(--primary) !important;">
                 <h5 class="modal-title">Chi tiết Ý kiến cử tri</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -373,7 +436,7 @@
 
     <!-- Modal Cập nhật Ý kiến (Admin) -->
     <div class="modal fade" id="modalCapNhatYkien" tabindex="-1">
-        <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">Cập nhật kết quả giải quyết</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -726,10 +789,10 @@
             document.getElementById('tb-taikhoan').innerHTML = globalData.taikhoan.map((item, i) => {
                 let id = item.id || i;
                 return `<tr>
-                    <td>${item['Họ và tên'] || ''}</td>
-                    <td>${item['Tên đăng nhập'] || ''}</td>
-                    <td>${item['Chức vụ hiện tại'] || ''}</td>
-                    <td>${item['Quyền'] || ''}</td>
+                    <td data-label="Họ và tên">${item['Họ và tên'] || ''}</td>
+                    <td data-label="Tên đăng nhập">${item['Tên đăng nhập'] || ''}</td>
+                    <td data-label="Chức vụ">${item['Chức vụ hiện tại'] || ''}</td>
+                    <td data-label="Quyền">${item['Quyền'] || ''}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary" onclick="openModal('taikhoan', '${id}')" title="Sửa"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-danger" onclick="deleteItem('deleteTaiKhoan', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
@@ -752,10 +815,10 @@
                     <button class="btn btn-sm btn-danger" onclick="deleteItem('deleteLichHop', '${id}')" title="Xóa"><i class="fas fa-trash"></i></button>
                 </td>` : '';
                 return `<tr>
-                    <td>${item['Tiêu đề'] || ''}</td>
-                    <td>${formatDateTime(item['Thời gian'], true)}</td>
-                    <td>${item['Địa điểm'] || ''}</td>
-                    <td>${item['Nội dung'] || ''}</td>
+                    <td data-label="Tiêu đề">${item['Tiêu đề'] || ''}</td>
+                    <td data-label="Thời gian">${formatDateTime(item['Thời gian'], true)}</td>
+                    <td data-label="Địa điểm">${item['Địa điểm'] || ''}</td>
+                    <td data-label="Nội dung">${item['Nội dung'] || ''}</td>
                     ${actions}
                 </tr>`;
             }).join('');
@@ -779,10 +842,10 @@
                 let displayDate = formatDateTime(ngay, false);
 
                 return `<tr>
-                    <td>${item['Số hiệu'] || ''}</td>
-                    <td>${item['Tên văn bản'] || ''}</td>
-                    <td>${displayDate}</td>
-                    <td><a href="${item['Link đính kèm'] || '#'}" target="_blank" class="text-primary-custom">Xem/Tải</a></td>
+                    <td data-label="Số hiệu">${item['Số hiệu'] || ''}</td>
+                    <td data-label="Tên văn bản">${item['Tên văn bản'] || ''}</td>
+                    <td data-label="Thời gian ban hành">${displayDate}</td>
+                    <td data-label="Link đính kèm"><a href="${item['Link đính kèm'] || '#'}" target="_blank" class="text-primary-custom">Xem/Tải</a></td>
                     ${actions}
                 </tr>`;
             }).join('');
@@ -844,10 +907,10 @@
                 actions += `</td>`;
 
                 return `<tr>
-                    <td>${sender}</td>
-                    <td>${summary}</td>
-                    <td>${dateStr}</td>
-                    <td><span class="badge ${badge}">${st}</span></td>
+                    <td data-label="Người gửi">${sender}</td>
+                    <td data-label="Nội dung">${summary}</td>
+                    <td data-label="Ngày gửi">${dateStr}</td>
+                    <td data-label="Trạng thái"><span class="badge ${badge}">${st}</span></td>
                     ${actions}
                 </tr>`;
             }).join('');
@@ -861,10 +924,9 @@
                 let dataDb = resDb.data || [];
                 document.getElementById('tb-daibieu').innerHTML = dataDb.map((item, i) => {
                     return `<tr>
-                        <td>${item['STT'] || (i + 1)}</td>
-                        <td>${item['Họ và Tên'] || item['Họ và tên'] || ''}</td>
-                        <td>${item['Chức vụ'] || ''}</td>
-                        <td>${item['Số điện thoại'] || item['số điện thoại'] || item['Số điện thoại liên hệ'] || ''}</td>
+                        <td data-label="Họ và tên">${item['Họ và Tên'] || item['Họ và tên'] || ''}</td>
+                        <td data-label="Chức vụ">${item['Chức vụ'] || ''}</td>
+                        <td data-label="Số điện thoại">${item['Số điện thoại'] || item['số điện thoại'] || item['Số điện thoại liên hệ'] || ''}</td>
                     </tr>`;
                 }).join('');
 
@@ -901,14 +963,13 @@
                         </div>
                         <div class="card-body p-0 table-responsive">
                             <table class="table table-hover m-0">
-                                <thead><tr><th>STT</th><th>Họ và tên</th><th>Chức vụ trong tổ</th><th>Chức vụ</th></tr></thead>
+                                <thead><tr><th>Họ và tên</th><th>Chức vụ trong tổ</th><th>Chức vụ</th></tr></thead>
                                 <tbody>
                                     ${group.members.map((m, i) => `
                                         <tr>
-                                            <td>${m['STT'] || (i + 1)}</td>
-                                            <td>${m['Họ và tên'] || m['Họ và Tên'] || ''}</td>
-                                            <td>${m['Chức vụ trong tổ'] || ''}</td>
-                                            <td>${m['Chức vụ'] || ''}</td>
+                                            <td data-label="Họ và tên">${m['Họ và tên'] || m['Họ và Tên'] || ''}</td>
+                                            <td data-label="Chức vụ trong tổ">${m['Chức vụ trong tổ'] || ''}</td>
+                                            <td data-label="Chức vụ">${m['Chức vụ'] || ''}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -923,10 +984,9 @@
                 let dataKtns = resKtns.data || [];
                 document.getElementById('tb-banktns').innerHTML = dataKtns.map((item, i) => {
                     return `<tr>
-                        <td>${item['STT'] || (i + 1)}</td>
-                        <td>${item['Họ và tên'] || item['Họ và Tên'] || ''}</td>
-                        <td>${item['Nghề nghiệp chức vụ'] || item['Nghề nghiệp, chức vụ'] || item['Chức vụ'] || ''}</td>
-                        <td>${item['Chức vụ trong Ban'] || ''}</td>
+                        <td data-label="Họ và tên">${item['Họ và tên'] || item['Họ và Tên'] || ''}</td>
+                        <td data-label="Nghề nghiệp chức vụ">${item['Nghề nghiệp chức vụ'] || item['Nghề nghiệp, chức vụ'] || item['Chức vụ'] || ''}</td>
+                        <td data-label="Chức vụ trong Ban">${item['Chức vụ trong Ban'] || ''}</td>
                     </tr>`;
                 }).join('');
 
@@ -935,10 +995,9 @@
                 let dataVhxh = resVhxh.data || [];
                 document.getElementById('tb-banvhxh').innerHTML = dataVhxh.map((item, i) => {
                     return `<tr>
-                        <td>${item['STT'] || (i + 1)}</td>
-                        <td>${item['Họ và tên'] || item['Họ và Tên'] || ''}</td>
-                        <td>${item['Nghề nghiệp chức vụ'] || item['Nghề nghiệp, chức vụ'] || item['Chức vụ'] || ''}</td>
-                        <td>${item['Chức vụ trong Ban'] || ''}</td>
+                        <td data-label="Họ và tên">${item['Họ và tên'] || item['Họ và Tên'] || ''}</td>
+                        <td data-label="Nghề nghiệp chức vụ">${item['Nghề nghiệp chức vụ'] || item['Nghề nghiệp, chức vụ'] || item['Chức vụ'] || ''}</td>
+                        <td data-label="Chức vụ trong Ban">${item['Chức vụ trong Ban'] || ''}</td>
                     </tr>`;
                 }).join('');
             } catch (e) {
